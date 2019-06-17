@@ -18,6 +18,7 @@ import {
   sort
 } from "ramda";
 import zip from "ramda/es/zip";
+import pipe from "ramda/es/pipe";
 
 // ----- permutations -----------------------------------------------------
 // Returns all permutations  a vector -----------------------------------------------
@@ -96,21 +97,17 @@ export const makeStackedMatrixOfGenerators = (dimensions, degree) => {
   return sort((a, b) => relevance(b) - relevance(a), stackedMatrix);
 };
 
-export const nInputsPolynomial = coefficients => variables => {
-  const powersMatrix = makeStackedMatrixOfGenerators(
-    variables.length,
-    coefficients.length
-  );
-
-  console.log("the powers matrix", powersMatrix);
-  console.log("the coefficients", coefficients);
+export const nInputsPolynomial = coefficients => (variables, degree) => {
+  const powersMatrix = makeStackedMatrixOfGenerators(variables.length, degree);
 
   return powersMatrix.reduce(
     (total, termPowers, i) =>
       total +
-      product(
-        zip(termPowers, variables).map((power, variable) => variable ** power)
-      ) *
+      pipe(
+        zip,
+        map(([power, variable]) => variable ** power),
+        product
+      )(termPowers, variables) *
         coefficients[i],
     0
   );
