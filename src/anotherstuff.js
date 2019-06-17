@@ -10,12 +10,14 @@ import {
   repeat,
   uniq,
   concat,
+  product,
   range,
   sum,
   findIndex,
   findLastIndex,
   sort
 } from "ramda";
+import zip from "ramda/es/zip";
 
 // ----- permutations -----------------------------------------------------
 // Returns all permutations  a vector -----------------------------------------------
@@ -56,6 +58,7 @@ const max = array =>
     (previous, current) => Math.max(previous, current),
     Number.MIN_VALUE
   );
+
 export const relevance = row =>
   sum(row) * 1000000 +
   max(row) * 1000 +
@@ -91,6 +94,26 @@ export const makeStackedMatrixOfGenerators = (dimensions, degree) => {
   }
 
   return sort((a, b) => relevance(b) - relevance(a), stackedMatrix);
+};
+
+export const nInputsPolynomial = coefficients => variables => {
+  const powersMatrix = makeStackedMatrixOfGenerators(
+    variables.length,
+    coefficients.length
+  );
+
+  console.log("the powers matrix", powersMatrix);
+  console.log("the coefficients", coefficients);
+
+  return powersMatrix.reduce(
+    (total, termPowers, i) =>
+      total +
+      product(
+        zip(termPowers, variables).map((power, variable) => variable ** power)
+      ) *
+        coefficients[i],
+    0
+  );
 };
 
 // ----- makePolynomial ---------------------------------------------------
